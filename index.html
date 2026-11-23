@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Philippine Population Analytics</title>
+  <meta name="description" content="Interactive population analytics dashboard for Philippine regions, 2000–2025." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div><strong>POPULASI</strong><small>PHILIPPINES</small></div>
+    </div>
+    <nav aria-label="Primary navigation">
+      <button class="nav-item active" data-view="overview"><span class="nav-icon">⌂</span>Overview</button>
+      <button class="nav-item" data-view="regions"><span class="nav-icon">◫</span>Regions</button>
+      <button class="nav-item" data-view="models"><span class="nav-icon">⌁</span>ML Models</button>
+      <button class="nav-item" data-view="data"><span class="nav-icon">▦</span>Data Explorer</button>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="status-dot"></div>
+      <div><small>DATA STATUS</small><strong>Dataset loaded</strong></div>
+    </div>
+  </aside>
+
+  <main>
+    <header>
+      <div>
+        <p class="eyebrow">ANALYTICS DASHBOARD</p>
+        <h1 id="page-title">Population Overview</h1>
+      </div>
+      <div class="header-actions">
+        <label class="upload-button" for="file-upload">↥ <span>Upload data</span></label>
+        <input id="file-upload" type="file" accept=".xlsx,.xls,.csv" hidden />
+        <a class="icon-button" id="download-csv" href="#" title="Download CSV">⇩</a>
+      </div>
+    </header>
+
+    <section id="overview-view" class="view active">
+      <div class="filter-row">
+        <div class="filter">
+          <span>Region</span>
+          <select id="region-filter"><option value="ALL">All regions</option></select>
+        </div>
+        <div class="filter">
+          <span>From</span>
+          <select id="from-year"></select>
+        </div>
+        <div class="filter">
+          <span>To</span>
+          <select id="to-year"></select>
+        </div>
+        <button class="apply-button" id="apply-filter">Apply filters</button>
+      </div>
+
+      <div class="metrics-grid">
+        <article class="metric-card"><div class="metric-label"><span>Latest population</span><i class="teal"></i></div><strong id="metric-population">—</strong><small id="metric-pop-year">2025 estimate</small></article>
+        <article class="metric-card"><div class="metric-label"><span>Regions tracked</span><i class="blue"></i></div><strong id="metric-regions">—</strong><small>Geographic divisions</small></article>
+        <article class="metric-card"><div class="metric-label"><span>Period growth</span><i class="violet"></i></div><strong id="metric-growth">—</strong><small id="metric-growth-period">Selected period</small></article>
+        <article class="metric-card"><div class="metric-label"><span>Average population</span><i class="gold"></i></div><strong id="metric-average">—</strong><small>Across selected records</small></article>
+      </div>
+
+      <div class="dashboard-grid">
+        <article class="panel trend-panel">
+          <div class="panel-head"><div><p>Population trend</p><h2 id="trend-title">All regions combined</h2></div><span class="legend"><i></i> Population</span></div>
+          <div class="chart-wrap"><canvas id="trend-chart"></canvas></div>
+        </article>
+
+        <article class="panel ranking-panel">
+          <div class="panel-head"><div><p>Regional ranking</p><h2 id="ranking-year">Latest year</h2></div></div>
+          <div id="ranking-list" class="ranking-list"></div>
+        </article>
+
+        <article class="panel growth-panel">
+          <div class="panel-head"><div><p>Period comparison</p><h2>Growth by region</h2></div></div>
+          <div class="chart-wrap small"><canvas id="growth-chart"></canvas></div>
+        </article>
+
+        <article class="panel distribution-panel">
+          <div class="panel-head"><div><p>Population distribution</p><h2>Latest regional values</h2></div></div>
+          <div class="chart-wrap small"><canvas id="distribution-chart"></canvas></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="regions-view" class="view"><div id="regions-grid" class="regions-grid"></div></section>
+
+    <section id="models-view" class="view">
+      <div class="model-banner"><div><p>MODEL PERFORMANCE</p><h2>Notebook results</h2></div><div class="winner"><small>BEST CLASSIFIER</small><strong>Random Forest</strong><span>95.93% accuracy</span></div></div>
+      <div class="model-grid">
+        <article class="panel model-card"><div class="model-type regression">REGRESSION</div><h3>Linear Regression</h3><div class="model-stat"><span>R² score</span><strong>0.9715</strong></div><div class="progress"><i style="width:97.15%"></i></div><dl><div><dt>MAE</dt><dd>2.37M</dd></div><div><dt>RMSE</dt><dd>4.07M</dd></div></dl></article>
+        <article class="panel model-card featured"><div class="model-type regression">REGRESSION</div><h3>Random Forest Regressor</h3><div class="model-stat"><span>R² score</span><strong>0.9995</strong></div><div class="progress"><i style="width:99.95%"></i></div><dl><div><dt>MAE</dt><dd>278.9K</dd></div><div><dt>RMSE</dt><dd>549.1K</dd></div></dl></article>
+        <article class="panel model-card"><div class="model-type classification">CLASSIFICATION</div><h3>Logistic Regression</h3><div class="model-stat"><span>Accuracy</span><strong>90.70%</strong></div><div class="progress"><i style="width:90.70%"></i></div><dl><div><dt>F1 score</dt><dd>0.9512</dd></div><div><dt>ROC AUC</dt><dd>0.0008</dd></div></dl></article>
+        <article class="panel model-card featured"><div class="model-type classification">CLASSIFICATION</div><h3>Random Forest Classifier</h3><div class="model-stat"><span>Accuracy</span><strong>95.93%</strong></div><div class="progress"><i style="width:95.93%"></i></div><dl><div><dt>F1 score</dt><dd>0.9781</dd></div><div><dt>ROC AUC</dt><dd>0.7989</dd></div></dl></article>
+      </div>
+      <article class="panel data-note"><strong>About these results</strong><p>Random Forest delivered the strongest performance in both tasks. The quarterly records used in the notebook are synthetic interpolation estimates, not official observations.</p></article>
+    </section>
+
+    <section id="data-view" class="view">
+      <article class="panel table-panel">
+        <div class="panel-head table-head"><div><p>Data explorer</p><h2 id="table-count">Records</h2></div><input id="table-search" type="search" placeholder="Search region…" /></div>
+        <div class="table-scroll"><table><thead><tr><th>Year</th><th>Region</th><th>Population</th><th>Share</th></tr></thead><tbody id="data-table"></tbody></table></div>
+      </article>
+    </section>
+  </main>
+
+  <div id="loading" class="loading"><div class="spinner"></div><span>Loading population data…</span></div>
+  <script src="app.js"></script>
+</body>
+</html>
